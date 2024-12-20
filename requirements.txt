@@ -1,3 +1,4 @@
+scikit-learn
 datetime
 matplotlib
 numpy
