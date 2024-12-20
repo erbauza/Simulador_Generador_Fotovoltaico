@@ -478,74 +478,9 @@ with resultados:
                     subtabla_ver1 = st.session_state['tabla'].loc['2019-01-01':'2019-3-20', :]
                     subtabla_ver2 = st.session_state['tabla'].loc['2019-12-21':'2019-12-31', :]
                     subtabla_ver = pd.concat([subtabla_ver1, subtabla_ver2])
-                    st.markdown(
-                        """
-                        <div style="text-align:center;">
-
-                        ### Potencia intantánea en función del tiempo
-                        ##### Verano
-
-                        </div>
-                            """,
-                        unsafe_allow_html=True
-                    )
-                    st.bar_chart(data=subtabla_ver, y='Potencia (kW)', x_label='Tiempo',
-                                 y_label='Potencia instantanea generada (kW)', color='#f04507', use_container_width=True)
-                    lapsos_funcionamiento_ver = (
-                        subtabla_ver['Potencia (kW)'] > 0).sum()
-                    lapsos_no_funcionamiento_ver = (
-                        subtabla_ver['Potencia (kW)'] == 0).sum()
-                    subtabla_ver = subtabla_ver.resample(
-                        'D').mean()  # Valores promedios diarios
-                    # subtabla_ver
-                    st.markdown(
-                        """
-                        <div style="text-align:center;">
-
-                        ### Potencia media diaria
-                        ##### Verano
-
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
-                    st.bar_chart(data=subtabla_ver, y='Potencia (kW)', x_label='Tiempo',
-                                 y_label='Potencia diaria promedio (kW)', color='#f04507', use_container_width=True)
-                    # cada lapso es de 10 min. t_funcionamiento en horas
-                    t_funcionamiento_ver = (10/60)*lapsos_funcionamiento_ver
-                    # cada lapso es de 10 min. t_funcionamiento en horas
-                    t_no_funcionamiento_ver = (
-                        10/60)*lapsos_no_funcionamiento_ver
-                    t_total_ver = t_funcionamiento_ver+t_no_funcionamiento_ver
-                    porcentajes_ver = [
-                        t_funcionamiento_ver/t_total_ver, t_no_funcionamiento_ver/t_total_ver]
-                    etiqueta = ['Porcentaje de Horas de Funcionamiento',
-                                'Porcentaje de Horas sin Funcionamiento']
-                    # Gráfico de tortas
-                    st.markdown(
-                        f"""
-                        <div style="text-align:center;">
-
-                        ### Tiempo de funcionamiento
-                        ##### Verano
-                        La primavera tiene 2184 horas, de las cuales el generador produce energía 
-                        durante {t_funcionamiento_ver: .0f} horas.
-
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
-                    fig, ax = plt.subplots()
-                    ax.pie(
-                        porcentajes_ver,
-                        labels=etiqueta,
-                        autopct='%1.1f%%',
-                        startangle=90,
-                        colors=['#f04507', '#84917c']
-                    )
-                    ax.axis('equal')
-                    st.pyplot(fig)
-                    st.write('---')
+                    inicio_ver = '2019-01-01'
+                    fin_ver = '2019-12-31'
+                    plot_potencia(subtabla_ver,inicio_ver, fin_ver, 'Verano', color='#f04507')
 
                 if oto is True:
                     inicio_otoño = '2019-03-21'
