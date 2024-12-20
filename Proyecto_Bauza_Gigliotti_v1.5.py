@@ -4,10 +4,11 @@ import matplotlib.pyplot as plt
 import streamlit as st
 import streamlit.components.v1 as components
 
+
 def plot_potencia(datos, fecha_inicio, fecha_fin, temporada, color):
     # Filtrar los datos entre las fechas proporcionadas
     subtabla = datos.loc[fecha_inicio:fecha_fin, :]
-    
+
     # Mostrar el título y el gráfico de barras
     st.markdown(
         f"""
@@ -22,11 +23,12 @@ def plot_potencia(datos, fecha_inicio, fecha_fin, temporada, color):
     st.bar_chart(data=subtabla, y='Potencia (kW)', x_label='Tiempo',
                  y_label='Potencia instantánea generada (kW)', color=color, use_container_width=True)
 
-    
-    lapsos_funcionamiento = (subtabla['Potencia (kW)'] > 0).sum() #Lapsos de funcionamiento 
-    lapsos_no_funcionamiento = (subtabla['Potencia (kW)'] == 0).sum() #Lapsos de NO funcionamiento 
+    # Lapsos de funcionamiento
+    lapsos_funcionamiento = (subtabla['Potencia (kW)'] > 0).sum()
+    # Lapsos de NO funcionamiento
+    lapsos_no_funcionamiento = (subtabla['Potencia (kW)'] == 0).sum()
 
-    subtabla = subtabla.resample('D').mean() #Calculo el promedio diario 
+    subtabla = subtabla.resample('D').mean()  # Calculo el promedio diario
 
     st.markdown(
         f"""
@@ -39,14 +41,16 @@ def plot_potencia(datos, fecha_inicio, fecha_fin, temporada, color):
         unsafe_allow_html=True
     )
     st.bar_chart(data=subtabla, y='Potencia (kW)', x_label='Tiempo',
-                 y_label='Potencia diaria promedio (kW)', color=color, use_container_width=True)
+                 y_label='Potencia media diaria (kW)', color=color, use_container_width=True)
 
-    #tiempo de funcionamiento, no funcionamiento en horas y total
-    t_funcionamiento = (10/60) * lapsos_funcionamiento  # cada lapso es de 10 min
+    # tiempo de funcionamiento, no funcionamiento en horas y total
+    # cada lapso es de 10 min
+    t_funcionamiento = (10/60) * lapsos_funcionamiento
     t_no_funcionamiento = (10/60) * lapsos_no_funcionamiento
     t_total = t_funcionamiento + t_no_funcionamiento
     porcentajes = [t_funcionamiento/t_total, t_no_funcionamiento/t_total]
-    etiqueta = ['Porcentaje de Horas de Funcionamiento', 'Porcentaje de Horas sin Funcionamiento']
+    etiqueta = ['Porcentaje de Horas de Funcionamiento',
+                'Porcentaje de Horas sin Funcionamiento']
 
     st.markdown(
         f"""
@@ -54,40 +58,33 @@ def plot_potencia(datos, fecha_inicio, fecha_fin, temporada, color):
 
         ### Tiempo de funcionamiento
         ##### {temporada}
-        La temporada tiene {t_total: .0f} horas, de las cuales el generador produce energía durante {t_funcionamiento: .0f} horas.
+        La estación tiene {t_total: .0f} horas, de las cuales el generador produce energía durante {t_funcionamiento: .0f} horas.
         </div>
         """,
         unsafe_allow_html=True
     )
-    
     # Gráfico de torta
     fig, ax = plt.subplots()
-    ax.pie(porcentajes, labels=etiqueta, autopct='%1.1f%%', startangle=90, colors=[color, '#84917c'])
+    ax.pie(porcentajes, labels=etiqueta, autopct='%1.1f%%',
+           startangle=90, colors=[color, '#84917c'])
     ax.axis('equal')
     st.pyplot(fig)
-    st.write('---')
+    st.divider()
 
-
-
-
-
-
-
-
-# st.set_page_config(layout="wide") 
-st.set_page_config(layout="centered") #Ajusta el contenido al centro de la pantalla
+st.set_page_config(layout="centered")# Ajusta el contenido al centro de la pantalla
 
 # usamos al final tabs ya que la otra forma no dejaba guardar el archivo subido
-informacion, calculos, resultados = st.tabs(["Información", "Cálculos", "Resultados"])
+informacion, calculos, resultados = st.tabs(
+    ["Información", "Cálculos", "Resultados"])
 
 with informacion:
 
-    # el container va separando contenidos, para que quede bien modular
-    with st.container():
-        
+    
+    with st.container(): # el container va separando contenidos, para que quede bien modular
+
         # lo siguiente que está escrito, y lo mismo va para todos los demas markdowns, es una forma que encontramos
         # para poder ajustar texto, centrarlo, etc, con la función de que te acepte codificación html
-        st.markdown (
+        st.markdown(
             """
             <div style="text-align:center;">
 
@@ -115,12 +112,12 @@ with informacion:
             
             </div>
             """,
-            unsafe_allow_html=True  
-         )
-        
-        st.image("Esquema en bloques de un GFV.jpeg", caption="Esquema en bloques de un GFV")
+            unsafe_allow_html=True
+        )
 
-       
+        st.image("Esquema en bloques de un GFV.jpeg",
+                 caption="Esquema en bloques de un GFV")
+
     with st.container():
 
         st.divider()
@@ -141,13 +138,13 @@ with informacion:
 
             </div>
             """,
-            unsafe_allow_html=True  
+            unsafe_allow_html=True
         )
-        
+
         # para expandir y contraer las referencias de las variables de la fórmula de cálculo de potencia
         with st.expander('Referencias'):
             st.markdown(
-            """
+                """
             <div style="text-align:justify;">
 
             * **$G$:** Irradiancia global incidente en forma normal a los módulos fotovoltaicos, en $W/m^2$. La
@@ -173,14 +170,14 @@ with informacion:
 
             </div>
             """,
-            unsafe_allow_html=True  
+                unsafe_allow_html=True
             )
-                
+
     with st.container():
 
         st.divider()
         st.header('Límite de generación')
-        
+
         st.markdown(
             """
             <div style="text-align:justify;">
@@ -200,13 +197,14 @@ with informacion:
 
             </div>
             """,
-            unsafe_allow_html=True  
-            )
+            unsafe_allow_html=True
+        )
 
     with st.container():
         st.divider()
         st.header('GFV de la UTN Facultad Regional Santa FE')
-        [info_utn, animacion]= st.columns([0.7,0.3]) # se crearon 2 columnas, una con texto, y otra con un gif
+        # se crearon 2 columnas, una con texto, y otra con un gif
+        [info_utn, animacion] = st.columns([0.7, 0.3])
         with info_utn:
             st. markdown(
                 """
@@ -224,7 +222,7 @@ with informacion:
                 unsafe_allow_html=True
             )
         with animacion:
-            st.image('UTN.gif',use_container_width=True)
+            st.image('UTN.gif', use_container_width=True)
 
         st.markdown(
             """
@@ -241,14 +239,15 @@ with informacion:
             </div>
             """,
             unsafe_allow_html=True
-            )
-        
+        )
+
         # si se desea saber más, se dispone un recuadro con la página de la facultad que habla del tema
-        components.iframe('https://www.frsf.utn.edu.ar/noticias/606-energia-limpia-y-ahorro-energetico-un-compromiso-para-la-utn-santa-fe',height=400 ,scrolling=True)
+        components.iframe(
+            'https://www.frsf.utn.edu.ar/noticias/606-energia-limpia-y-ahorro-energetico-un-compromiso-para-la-utn-santa-fe', height=400, scrolling=True)
 
 
-with calculos: 
-    
+with calculos:
+
     st.markdown(
         """
         <div style="text-align:center;">
@@ -265,7 +264,7 @@ with calculos:
         y gráficos.
         </div>
         """,
-        unsafe_allow_html=True  
+        unsafe_allow_html=True
     )
 
     st.markdown(
@@ -276,52 +275,66 @@ with calculos:
 
         </div>
         """,
-        unsafe_allow_html=True  
+        unsafe_allow_html=True
     )
 
     click_2 = st.checkbox('Modificar valores estándar', False)
     # si click_2 es true, uno puede modificar los valores, de otra forma se clavan los parámetros de la facu
     if click_2:
         st.write("Modifique los valores")
-        Gstd = st.number_input('Irradiancia estándar $[W/m^2]$', min_value=0, max_value=1500, value=1000)
-        Tr = st.number_input('Temperatura de Referencia $[°C]$', min_value=0.0, max_value=60.0, value=25.0, format='%.1f', step=0.1)
+        Gstd = st.number_input(
+            'Irradiancia estándar $[W/m^2]$', min_value=0, max_value=1500, value=1000)
+        Tr = st.number_input(
+            'Temperatura de Referencia $[°C]$', min_value=0.0, max_value=60.0, value=25.0, format='%.1f', step=0.1)
     else:
         Gstd = 1000
         Tr = 25
         st.write(f'**Irradiancia estándar: {Gstd:.0f} $[W/m^2]$**')
         st.write(f'**Temperatura estándar de Referencia : {Tr:.0f} $[°C]$**')
-    
-    
-    DatosUTN = st.toggle("Activar para trabajar con los valores del generador de la FRSF-UTN")
-    # lo mismo sucede aqui, nada más que con un toggle
+
+    DatosUTN = st.toggle(
+        "Activar para trabajar con los valores del generador de la FRSF-UTN")
+    # lo mismo sucede acá, nada más que con un toggle
     if DatosUTN:
         st.write('Activado FRSF-UTN')
-        N = st.number_input('Cantidad de paneles', min_value=12, max_value=12, value=12)
-        Ppico = st.number_input('Potencia Pico del panel [W]', min_value=240, max_value=240, value=240)
-        G = st.number_input('Nivel de irradiancia $[W/m^2]$', min_value=1000, max_value=1000, value=1000)
-        T = st.number_input('Temperatura [°C]', min_value=20.0, max_value=20.0, value=20.0, format='%.1f')
-        kp = st.number_input('Coeficiente de pot-temp', min_value=-0.0044, max_value=-0.0044, value=-0.0044, format='%.4f')
-        eta = st.number_input('Rendimiento global', min_value=0.97, max_value=0.97, value=0.97, format='%.2f')
+        N = st.number_input('Cantidad de paneles',
+                            min_value=12, max_value=12, value=12)
+        Ppico = st.number_input(
+            'Potencia Pico del panel [W]', min_value=240, max_value=240, value=240)
+        G = st.number_input(
+            'Nivel de irradiancia $[W/m^2]$', min_value=1000, max_value=1000, value=1000)
+        T = st.number_input(
+            'Temperatura [°C]', min_value=20.0, max_value=20.0, value=20.0, format='%.1f')
+        kp = st.number_input('Coeficiente de pot-temp', min_value=-
+                             0.0044, max_value=-0.0044, value=-0.0044, format='%.4f')
+        eta = st.number_input('Rendimiento global', min_value=0.97,
+                              max_value=0.97, value=0.97, format='%.2f')
     else:
-        N = st.number_input('Cantidad de paneles', min_value=1, max_value=1000, value=12)
-        Ppico = st.number_input('Potencia Pico del panel [W]', min_value=1, max_value=2000, value=240)
-        G = st.number_input('Nivel de irradiancia $[W/m^2]$', min_value=0, max_value=1500, value=1000)
-        T = st.number_input('Temperatura [°C]', min_value=-10.0, max_value=60.0, value=20.0, format='%.1f', step=0.5)
-        kp = st.number_input('Coeficiente de pot-temp', min_value=-0.01, max_value=0.0, value=-0.0044, format='%.4f', step=0.001)
-        eta = st.number_input('Rendimiento global', min_value=0.0, max_value=1.0, value=0.97, format='%.2f', step=0.01)
-    
+        N = st.number_input('Cantidad de paneles',
+                            min_value=1, max_value=1000, value=12)
+        Ppico = st.number_input(
+            'Potencia Pico del panel [W]', min_value=1, max_value=2000, value=240)
+        G = st.number_input(
+            'Nivel de irradiancia $[W/m^2]$', min_value=0, max_value=1500, value=1000)
+        T = st.number_input('Temperatura [°C]', min_value=-10.0,
+                            max_value=60.0, value=20.0, format='%.1f', step=0.5)
+        kp = st.number_input('Coeficiente de pot-temp', min_value=-0.01,
+                             max_value=0.0, value=-0.0044, format='%.4f', step=0.001)
+        eta = st.number_input('Rendimiento global', min_value=0.0,
+                              max_value=1.0, value=0.97, format='%.2f', step=0.01)
+
     # el siguiente session_state quedó de unas pruebas intentando
     st.session_state['inputs'] = {'Gstd': Gstd, 'Tr': Tr, 'N': N, 'Ppico': Ppico,
-                                    'G': G, 'T': T, 'kp': kp,'eta': eta}
+                                  'G': G, 'T': T, 'kp': kp, 'eta': eta}
 
     P = N * Ppico * G / Gstd * (1 + kp * (T - Tr)) * eta * 1e-3
-    
+
     st.success(f'**Potencia obtenida: {P:.2f} kW**')
 
 
 with resultados:
 
-    #titulo principal
+    # titulo principal
     st.markdown(
         """
         <div style="text-align:center;">
@@ -338,16 +351,17 @@ with resultados:
         
         </div>
         """,
-        unsafe_allow_html=True  
+        unsafe_allow_html=True
     )
 
     if 'tabla' not in st.session_state:
         st.session_state['tabla'] = None
-    
-    archivo = st.file_uploader("Cargar archivo", type='xlsx', accept_multiple_files=False)
+
+    archivo = st.file_uploader(
+        "Cargar archivo", type='xlsx', accept_multiple_files=False)
     if archivo:
         st.session_state['archivo'] = archivo
-        
+
         if st.button("Recibir Resultados"):
             if 'archivo' in st.session_state:
                 archivo = st.session_state['archivo']
@@ -356,12 +370,13 @@ with resultados:
 
                 inputs = st.session_state['inputs']
                 tabla['Potencia (kW)'] = (
-                    inputs['N'] * inputs['Ppico'] * tabla[nombre_G] / inputs['Gstd']
+                    inputs['N'] * inputs['Ppico'] *
+                    tabla[nombre_G] / inputs['Gstd']
                     * (1 + inputs['kp'] * (tabla[nombre_T] - inputs['Tr'])) * inputs['eta'] * 1e-3
                 )
-                tabla['Energía (kWh)']= tabla['Potencia (kW)']*10/60
+                tabla['Energía (kWh)'] = tabla['Potencia (kW)']*10/60
                 st.session_state['tabla'] = tabla
-       
+
         if st.session_state['tabla'] is not None:
             st.logo('UTN_FRSF_logo.jpg')
             st.write('¡Su tabla ha sido cargada con éxito!')
@@ -371,7 +386,7 @@ with resultados:
             # Selección de fecha
             with st.sidebar:
                 st.write('Seleccione las caracteristicas de su interes.')
-                diario= st.checkbox('Evolución Diaria')
+                diario = st.checkbox('Evolución Diaria')
             if diario is True:
                 st.header('Evolución Diaria')
                 fecha = st.date_input(
@@ -382,33 +397,40 @@ with resultados:
                 )
                 # Filtrar tabla por fecha
                 st.markdown(
-                        """
+                    """
                         <div style="text-align:center;">
 
                         ### Evolución de la Potencia intantánea en el día 
 
                         </div>
                         """,
-                        unsafe_allow_html=True  
-                    )
+                    unsafe_allow_html=True
+                )
                 subtabla = st.session_state['tabla'].loc[f'{fecha.year}-{fecha.month}-{fecha.day}', :]
-                st.line_chart(data=subtabla, y='Potencia (kW)', x_label='Tiempo', y_label='kW', use_container_width=True)
+                st.line_chart(data=subtabla, y='Potencia (kW)',
+                              x_label='Tiempo', y_label='kW', use_container_width=True)
                 st.write('---')
             with st.sidebar:
-                anual= st.checkbox('Características Anuales de Funcionamiento')
+                anual = st.checkbox(
+                    'Características Anuales de Funcionamiento')
             if anual is True:
-                #Energía
-                tabla_anual= st.session_state['tabla']
-                energia_anual=(tabla_anual['Energía (kWh)']).sum()
-                #Horas de funcionamiento
-                lapsos_funcionamiento_anual=(tabla_anual['Potencia (kW)']>0).sum()
-                lapsos_no_funcionamiento_anual=(tabla_anual['Potencia (kW)']==0).sum()
-                t_funcionamiento_anual= (lapsos_funcionamiento_anual)*10/60
-                t_no_funcionamiento_anual= (lapsos_no_funcionamiento_anual)*10/60
-                porcentajes_anual= [t_funcionamiento_anual, t_no_funcionamiento_anual]
-                etiqueta=['Porcentaje de Horas de Funcionamiento', 'Porcentaje de Horas sin Funcionamiento']
+                # Energía
+                tabla_anual = st.session_state['tabla']
+                energia_anual = (tabla_anual['Energía (kWh)']).sum()
+                # Horas de funcionamiento
+                lapsos_funcionamiento_anual = (
+                    tabla_anual['Potencia (kW)'] > 0).sum()
+                lapsos_no_funcionamiento_anual = (
+                    tabla_anual['Potencia (kW)'] == 0).sum()
+                t_funcionamiento_anual = (lapsos_funcionamiento_anual)*10/60
+                t_no_funcionamiento_anual = (
+                    lapsos_no_funcionamiento_anual)*10/60
+                porcentajes_anual = [
+                    t_funcionamiento_anual, t_no_funcionamiento_anual]
+                etiqueta = ['Porcentaje de Horas de Funcionamiento',
+                            'Porcentaje de Horas sin Funcionamiento']
                 st.markdown(
-                        f"""
+                    f"""
                         ##### Energía anual producida = {energia_anual: .1f} (kWh).
                         <div style="text-align:center;">
 
@@ -417,26 +439,27 @@ with resultados:
                         durante {t_funcionamiento_anual: .0f} horas.
                         </div>
                         """,
-                        unsafe_allow_html=True  
-                    )
+                    unsafe_allow_html=True
+                )
                 fig, ax = plt.subplots()
                 ax.pie(
-                        porcentajes_anual, 
-                        labels=etiqueta, 
-                        autopct='%1.1f%%', 
-                        startangle=90, 
-                        colors=['#fff700', '#84917c']
+                    porcentajes_anual,
+                    labels=etiqueta,
+                    autopct='%1.1f%%',
+                    startangle=90,
+                    colors=['#fff700', '#84917c']
                 )
                 ax.axis('equal')
                 st.pyplot(fig)
                 st.write('---')
 
             with st.sidebar:
-                estacional= st.checkbox('Características Estacionales de Funcionamiento ')
-            #st.sidebar( estacional= st.checkbox('Características Estacionales de Funcionamiento '))
+                estacional = st.checkbox(
+                    'Características Estacionales de Funcionamiento ')
+            # st.sidebar( estacional= st.checkbox('Características Estacionales de Funcionamiento '))
             if estacional is True:
-                
-                with st.sidebar: 
+
+                with st.sidebar:
                     st.write('---')
                     estaciones = st.popover("Marque las estaciones de interes")
                     prim = estaciones.checkbox("Primavera ", False)
@@ -444,18 +467,17 @@ with resultados:
                     oto = estaciones.checkbox("Otoño ", False)
                     invi = estaciones.checkbox("Invierno", False)
                     st.write('---')
-                
 
                 if prim is True:
-                    inicio_prim='2019-09-21'
-                    fin_prim= '2019-12-20'
-                    a=plot_potencia(st.session_state['tabla'],inicio_prim,fin_prim, 'Primavera', color='#04d442')
-
+                    inicio_prim = '2019-09-21'
+                    fin_prim = '2019-12-20'
+                    plot_potencia(
+                        st.session_state['tabla'], inicio_prim, fin_prim, 'Primavera', color='#04d442')
 
                 if ver is True:
                     subtabla_ver1 = st.session_state['tabla'].loc['2019-01-01':'2019-3-20', :]
-                    subtabla_ver2= st.session_state['tabla'].loc['2019-12-21':'2019-12-31', :]
-                    subtabla_ver= pd.concat([subtabla_ver1, subtabla_ver2])
+                    subtabla_ver2 = st.session_state['tabla'].loc['2019-12-21':'2019-12-31', :]
+                    subtabla_ver = pd.concat([subtabla_ver1, subtabla_ver2])
                     st.markdown(
                         """
                         <div style="text-align:center;">
@@ -465,13 +487,17 @@ with resultados:
 
                         </div>
                             """,
-                        unsafe_allow_html=True  
+                        unsafe_allow_html=True
                     )
-                    st.bar_chart(data=subtabla_ver, y='Potencia (kW)', x_label='Tiempo', y_label='Potencia instantanea generada (kW)',color='#f04507'  ,use_container_width=True)
-                    lapsos_funcionamiento_ver = (subtabla_ver['Potencia (kW)'] > 0).sum()
-                    lapsos_no_funcionamiento_ver = (subtabla_ver['Potencia (kW)'] == 0).sum()
-                    subtabla_ver= subtabla_ver.resample('D').mean() #Valores promedios diarios
-                    #subtabla_ver
+                    st.bar_chart(data=subtabla_ver, y='Potencia (kW)', x_label='Tiempo',
+                                 y_label='Potencia instantanea generada (kW)', color='#f04507', use_container_width=True)
+                    lapsos_funcionamiento_ver = (
+                        subtabla_ver['Potencia (kW)'] > 0).sum()
+                    lapsos_no_funcionamiento_ver = (
+                        subtabla_ver['Potencia (kW)'] == 0).sum()
+                    subtabla_ver = subtabla_ver.resample(
+                        'D').mean()  # Valores promedios diarios
+                    # subtabla_ver
                     st.markdown(
                         """
                         <div style="text-align:center;">
@@ -481,15 +507,21 @@ with resultados:
 
                         </div>
                         """,
-                        unsafe_allow_html=True  
+                        unsafe_allow_html=True
                     )
-                    st.bar_chart(data=subtabla_ver, y='Potencia (kW)', x_label='Tiempo', y_label='Potencia diaria promedio (kW)',color='#f04507', use_container_width=True)
-                    t_funcionamiento_ver= (10/60)*lapsos_funcionamiento_ver #cada lapso es de 10 min. t_funcionamiento en horas
-                    t_no_funcionamiento_ver= (10/60)*lapsos_no_funcionamiento_ver #cada lapso es de 10 min. t_funcionamiento en horas
-                    t_total_ver=t_funcionamiento_ver+t_no_funcionamiento_ver
-                    porcentajes_ver= [t_funcionamiento_ver/t_total_ver, t_no_funcionamiento_ver/t_total_ver]
-                    etiqueta=['Porcentaje de Horas de Funcionamiento', 'Porcentaje de Horas sin Funcionamiento']
-                    #Gráfico de tortas
+                    st.bar_chart(data=subtabla_ver, y='Potencia (kW)', x_label='Tiempo',
+                                 y_label='Potencia diaria promedio (kW)', color='#f04507', use_container_width=True)
+                    # cada lapso es de 10 min. t_funcionamiento en horas
+                    t_funcionamiento_ver = (10/60)*lapsos_funcionamiento_ver
+                    # cada lapso es de 10 min. t_funcionamiento en horas
+                    t_no_funcionamiento_ver = (
+                        10/60)*lapsos_no_funcionamiento_ver
+                    t_total_ver = t_funcionamiento_ver+t_no_funcionamiento_ver
+                    porcentajes_ver = [
+                        t_funcionamiento_ver/t_total_ver, t_no_funcionamiento_ver/t_total_ver]
+                    etiqueta = ['Porcentaje de Horas de Funcionamiento',
+                                'Porcentaje de Horas sin Funcionamiento']
+                    # Gráfico de tortas
                     st.markdown(
                         f"""
                         <div style="text-align:center;">
@@ -501,31 +533,28 @@ with resultados:
 
                         </div>
                         """,
-                        unsafe_allow_html=True  
+                        unsafe_allow_html=True
                     )
                     fig, ax = plt.subplots()
                     ax.pie(
-                        porcentajes_ver, 
-                        labels=etiqueta, 
-                        autopct='%1.1f%%', 
-                        startangle=90, 
+                        porcentajes_ver,
+                        labels=etiqueta,
+                        autopct='%1.1f%%',
+                        startangle=90,
                         colors=['#f04507', '#84917c']
                     )
                     ax.axis('equal')
                     st.pyplot(fig)
                     st.write('---')
-                
 
                 if oto is True:
-                    inicio_otoño='2019-03-21'
-                    fin_otoño= '2019-06-20'
-                    plot_potencia(st.session_state['tabla'],inicio_otoño,fin_otoño, 'Otoño', color='#b06e17')
-                    
-                
+                    inicio_otoño = '2019-03-21'
+                    fin_otoño = '2019-06-20'
+                    plot_potencia(
+                        st.session_state['tabla'], inicio_otoño, fin_otoño, 'Otoño', color='#b06e17')
 
                 if invi is True:
-                    inicio_invierno='2019-06-21'
-                    fin_invierno= '2019-09-20'
-                    plot_potencia(st.session_state['tabla'],inicio_invierno,fin_invierno, 'Invierno', color='#09a9e3')
-
-                    
+                    inicio_invierno = '2019-06-21'
+                    fin_invierno = '2019-09-20'
+                    plot_potencia(
+                        st.session_state['tabla'], inicio_invierno, fin_invierno, 'Invierno', color='#09a9e3')
